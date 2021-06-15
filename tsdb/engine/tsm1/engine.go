@@ -916,8 +916,8 @@ func (e *Engine) IsIdle() (state bool, reason string) {
 
 	if cacheSize := e.Cache.Size(); cacheSize > 0 {
 		return false, "not idle because cache size is nonzero"
-	} else if !e.CompactionPlan.FullyCompacted() {
-		return false, "not idle because shard is not fully compacted"
+	} else if c, r := e.CompactionPlan.FullyCompacted(); !c {
+		return false, r
 	} else {
 		return true, ""
 	}

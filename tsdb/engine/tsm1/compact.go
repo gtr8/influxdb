@@ -93,7 +93,7 @@ type CompactionPlanner interface {
 	PlanLevel(level int) []CompactionGroup
 	PlanOptimize() []CompactionGroup
 	Release(group []CompactionGroup)
-	FullyCompacted() bool
+	FullyCompacted() (bool, string)
 
 	// ForceFull causes the planner to return a full compaction plan the next
 	// time Plan() is called if there are files that could be compacted.
@@ -213,9 +213,15 @@ func (c *DefaultPlanner) ParseFileName(path string) (int, int, error) {
 }
 
 // FullyCompacted returns true if the shard is fully compacted.
-func (c *DefaultPlanner) FullyCompacted() bool {
+func (c *DefaultPlanner) FullyCompacted() (bool, string) {
 	gens := c.findGenerations(false)
-	return len(gens) <= 1 && !gens.hasTombstones()
+	if len(gens) > 1 {
+		return false, "not fully compacted and not idle because of more than one generation"
+	} else if gens.hasTombstones() {
+		return false, "not fully compacted and not idle because of tombstones"
+	} else {
+		return true, ""
+	}
 }
 
 // ForceFull causes the planner to return a full compaction plan the next time
