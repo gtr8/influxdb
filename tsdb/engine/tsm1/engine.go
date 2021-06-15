@@ -2269,11 +2269,10 @@ func (s *compactionStrategy) compactGroup() {
 		err   error
 		files []string
 	)
-
 	if s.fast {
-		files, err = s.compactor.CompactFast(group)
+		files, err = s.compactor.CompactFast(group, log)
 	} else {
-		files, err = s.compactor.CompactFull(group)
+		files, err = s.compactor.CompactFull(group, log)
 	}
 
 	if err != nil {
